@@ -1,0 +1,63 @@
+x-base: &base
+  restart: unless-stopped
+  env_file: .env
+
+services:
+  service:
+    <<: *base
+    container_name: event_api
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 50050:50050
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    command: ["./main"]
+
+  migrations:
+    <<: *base
+    container_name: db_migrations
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: migrations
+    restart: no
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["./migrate"]
+
+  postgres:
+    container_name: db
+    image: postgres:18.0-alpine3.22
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  
+  redis:
+    <<: *base
+    image: redis:8.2-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    
+volumes:
+  db_data:
+  redis_data:

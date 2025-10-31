@@ -1,0 +1,5 @@
+port: 50050
+database:
+  sslmode: disable
+redis:
+  cache_ttl: 1m

@@ -1,0 +1,37 @@
+package repositories
+
+import (
+	"context"
+
+	"github.com/Estriper0/EventService/internal/models"
+)
+
+type IEventRepository interface {
+	GetById(
+		ctx context.Context,
+		id int,
+	) (*models.EventResponse, error)
+	Create(
+		ctx context.Context,
+		event *models.EventCreateRequest,
+	) (int, error)
+	GetAll(
+		ctx context.Context,
+	) ([]*models.EventResponse, error)
+	GetAllByCreator(
+		ctx context.Context,
+		creator string,
+	) ([]*models.EventResponse, error)
+	GetAllByStatus(
+		ctx context.Context,
+		status string,
+	) ([]*models.EventResponse, error)
+	DeleteById(
+		ctx context.Context,
+		id int,
+	) error
+	Update(
+		ctx context.Context,
+		event *models.EventUpdateRequest,
+	) error
+}
