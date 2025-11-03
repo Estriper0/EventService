@@ -254,6 +254,7 @@ func TestEventService_DeleteById(t *testing.T) {
 				mockRepo.EXPECT().
 					DeleteById(ctx, 1).
 					Return(nil)
+				mockCache.EXPECT().Del(ctx, gomock.Any()).Return(assert.AnError)
 			},
 			wantErr: nil,
 		},
@@ -319,6 +320,7 @@ func TestEventService_Update(t *testing.T) {
 				mockRepo.EXPECT().
 					Update(ctx, req).
 					Return(nil)
+				mockCache.EXPECT().Del(ctx, gomock.Any()).Return(assert.AnError)
 			},
 			wantErr: nil,
 		},
