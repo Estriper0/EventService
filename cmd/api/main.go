@@ -7,7 +7,7 @@ import (
 
 	"github.com/Estriper0/EventService/internal/app"
 	"github.com/Estriper0/EventService/internal/config"
-	"github.com/Estriper0/EventService/pkg/logger"
+	"github.com/Estriper0/EventService/internal/logger"
 )
 
 func main() {

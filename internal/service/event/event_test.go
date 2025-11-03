@@ -7,11 +7,11 @@ import (
 
 	"github.com/Estriper0/EventService/internal/cache/mocks"
 	"github.com/Estriper0/EventService/internal/config"
+	"github.com/Estriper0/EventService/internal/logger"
 	"github.com/Estriper0/EventService/internal/models"
 	"github.com/Estriper0/EventService/internal/repositories"
 	mocksRepo "github.com/Estriper0/EventService/internal/repositories/mocks"
 	"github.com/Estriper0/EventService/internal/service"
-	"github.com/Estriper0/EventService/pkg/logger"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/vmihailenco/msgpack/v5"

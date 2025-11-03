@@ -6,10 +6,10 @@ import (
 
 	rd "github.com/Estriper0/EventService/internal/cache/redis"
 	"github.com/Estriper0/EventService/internal/config"
+	db "github.com/Estriper0/EventService/internal/repositories/database"
 	event_repo "github.com/Estriper0/EventService/internal/repositories/database/event"
 	"github.com/Estriper0/EventService/internal/server"
 	event_service "github.com/Estriper0/EventService/internal/service/event"
-	"github.com/Estriper0/EventService/pkg/db"
 	"github.com/redis/go-redis/v9"
 )
 
