@@ -130,6 +130,7 @@ func (s *EventService) DeleteById(ctx context.Context, id int) error {
 		)
 		return service.ErrRepositoryError
 	}
+	_ = s.cache.Del(ctx, "event:"+strconv.Itoa(id))
 	s.logger.Info(
 		"Successful delete event",
 		slog.Int("id", id),
@@ -154,6 +155,7 @@ func (s *EventService) Update(ctx context.Context, event *models.EventUpdateRequ
 		)
 		return service.ErrRepositoryError
 	}
+	_ = s.cache.Del(ctx, "event:"+strconv.Itoa(event.Id))
 	s.logger.Info(
 		"Successful update event",
 		slog.Int("id", event.Id),
