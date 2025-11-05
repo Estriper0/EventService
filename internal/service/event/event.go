@@ -11,7 +11,6 @@ import (
 	"github.com/Estriper0/EventService/internal/models"
 	"github.com/Estriper0/EventService/internal/repositories"
 	"github.com/Estriper0/EventService/internal/service"
-	"github.com/vmihailenco/msgpack/v5"
 )
 
 type EventService struct {
@@ -62,19 +61,17 @@ func (s *EventService) Create(ctx context.Context, event *models.EventCreateRequ
 }
 
 func (s *EventService) GetById(ctx context.Context, id int) (*models.EventResponse, error) {
-	data, err := s.cache.GetBytes(ctx, "event:"+strconv.Itoa(id))
-	if err == nil {
-		var event models.EventResponse
-		err = msgpack.Unmarshal(data, &event)
-		if err == nil {
-			s.logger.Info(
-				"Successful getting event from cache",
-				slog.Int("id", id),
-			)
-			return &event, nil
-		}
+	event, err := s.cache.GetEvent(ctx, id)
+	if err != nil && err != cache.ErrNotFound {
+		s.logger.Error(
+			"Error in redis getting event",
+			slog.String("error", err.Error()),
+		)
+	} else if err == nil {
+		return event, nil
 	}
-	event, err := s.eventRepo.GetById(ctx, id)
+
+	event, err = s.eventRepo.GetById(ctx, id)
 	if err != nil {
 		if errors.Is(err, repositories.ErrRecordNotFound) {
 			s.logger.Info(
@@ -94,22 +91,20 @@ func (s *EventService) GetById(ctx context.Context, id int) (*models.EventRespon
 		"Successful getting event",
 		slog.Int("id", id),
 	)
-	data, err = msgpack.Marshal(event)
-	if err == nil {
-		err = s.cache.Set(ctx, "event:"+strconv.Itoa(id), data, s.config.Redis.CacheTTL)
-		if err != nil {
-			s.logger.Warn(
-				"Failed to add to cache",
-				slog.Int("id", id),
-				slog.String("err", err.Error()),
-			)
-		} else {
-			s.logger.Info(
-				"Successfully added to cache",
-				slog.Int("id", id),
-			)
-		}
+
+	err = s.cache.SetEvent(ctx, event, s.config.Redis.CacheTTL)
+	if err != nil {
+		s.logger.Error(
+			"Error in redis setting event",
+			slog.String("error", err.Error()),
+		)
+	} else {
+		s.logger.Info(
+			"Successfully added to cache",
+			slog.Int("id", id),
+		)
 	}
+
 	return event, nil
 }
 
@@ -130,7 +125,14 @@ func (s *EventService) DeleteById(ctx context.Context, id int) error {
 		)
 		return service.ErrRepositoryError
 	}
-	_ = s.cache.Del(ctx, "event:"+strconv.Itoa(id))
+	err = s.cache.Del(ctx, "event:"+strconv.Itoa(id))
+	if err != nil {
+		s.logger.Error(
+			"Error in redis delete event",
+			slog.Int("id", id),
+			slog.String("err", err.Error()),
+		)
+	}
 	s.logger.Info(
 		"Successful delete event",
 		slog.Int("id", id),
@@ -155,7 +157,14 @@ func (s *EventService) Update(ctx context.Context, event *models.EventUpdateRequ
 		)
 		return service.ErrRepositoryError
 	}
-	_ = s.cache.Del(ctx, "event:"+strconv.Itoa(event.Id))
+	err = s.cache.Del(ctx, "event:"+strconv.Itoa(event.Id))
+	if err != nil {
+		s.logger.Error(
+			"Error in redis delete event",
+			slog.Int("id", event.Id),
+			slog.String("err", err.Error()),
+		)
+	}
 	s.logger.Info(
 		"Successful update event",
 		slog.Int("id", event.Id),

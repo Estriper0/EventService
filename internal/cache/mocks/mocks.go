@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 	time "time"
 
+	models "github.com/Estriper0/EventService/internal/models"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -49,61 +50,31 @@ func (mr *MockCacheMockRecorder) Del(ctx, key interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Del", reflect.TypeOf((*MockCache)(nil).Del), ctx, key)
 }
 
-// Exists mocks base method.
-func (m *MockCache) Exists(ctx context.Context, key string) (bool, error) {
+// GetEvent mocks base method.
+func (m *MockCache) GetEvent(ctx context.Context, id int) (*models.EventResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Exists", ctx, key)
-	ret0, _ := ret[0].(bool)
+	ret := m.ctrl.Call(m, "GetEvent", ctx, id)
+	ret0, _ := ret[0].(*models.EventResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Exists indicates an expected call of Exists.
-func (mr *MockCacheMockRecorder) Exists(ctx, key interface{}) *gomock.Call {
+// GetEvent indicates an expected call of GetEvent.
+func (mr *MockCacheMockRecorder) GetEvent(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exists", reflect.TypeOf((*MockCache)(nil).Exists), ctx, key)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEvent", reflect.TypeOf((*MockCache)(nil).GetEvent), ctx, id)
 }
 
-// Get mocks base method.
-func (m *MockCache) Get(ctx context.Context, key string) (string, error) {
+// SetEvent mocks base method.
+func (m *MockCache) SetEvent(ctx context.Context, event *models.EventResponse, ttl time.Duration) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", ctx, key)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Get indicates an expected call of Get.
-func (mr *MockCacheMockRecorder) Get(ctx, key interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockCache)(nil).Get), ctx, key)
-}
-
-// GetBytes mocks base method.
-func (m *MockCache) GetBytes(ctx context.Context, key string) ([]byte, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBytes", ctx, key)
-	ret0, _ := ret[0].([]byte)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetBytes indicates an expected call of GetBytes.
-func (mr *MockCacheMockRecorder) GetBytes(ctx, key interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBytes", reflect.TypeOf((*MockCache)(nil).GetBytes), ctx, key)
-}
-
-// Set mocks base method.
-func (m *MockCache) Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Set", ctx, key, value, ttl)
+	ret := m.ctrl.Call(m, "SetEvent", ctx, event, ttl)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Set indicates an expected call of Set.
-func (mr *MockCacheMockRecorder) Set(ctx, key, value, ttl interface{}) *gomock.Call {
+// SetEvent indicates an expected call of SetEvent.
+func (mr *MockCacheMockRecorder) SetEvent(ctx, event, ttl interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockCache)(nil).Set), ctx, key, value, ttl)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetEvent", reflect.TypeOf((*MockCache)(nil).SetEvent), ctx, event, ttl)
 }

@@ -14,7 +14,6 @@ import (
 	"github.com/Estriper0/EventService/internal/service"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/vmihailenco/msgpack/v5"
 )
 
 func TestEventService_GetAll(t *testing.T) {
@@ -143,7 +142,6 @@ func TestEventService_GetById(t *testing.T) {
 
 	ctx := context.Background()
 	event := &models.EventResponse{Id: 1, Title: "Event"}
-	eventBytes, _ := msgpack.Marshal(event)
 
 	tests := []struct {
 		name    string
@@ -157,8 +155,8 @@ func TestEventService_GetById(t *testing.T) {
 			id:   1,
 			setup: func() {
 				mockCache.EXPECT().
-					GetBytes(ctx, "event:1").
-					Return(eventBytes, nil)
+					GetEvent(ctx, 1).
+					Return(event, nil)
 			},
 			want:    event,
 			wantErr: nil,
@@ -168,7 +166,7 @@ func TestEventService_GetById(t *testing.T) {
 			id:   2,
 			setup: func() {
 				mockCache.EXPECT().
-					GetBytes(ctx, "event:2").
+					GetEvent(ctx, 2).
 					Return(nil, assert.AnError)
 
 				mockRepo.EXPECT().
@@ -176,7 +174,7 @@ func TestEventService_GetById(t *testing.T) {
 					Return(&models.EventResponse{Id: 2, Title: "DB Event"}, nil)
 
 				mockCache.EXPECT().
-					Set(ctx, "event:2", gomock.Any(), cfg.Redis.CacheTTL).
+					SetEvent(ctx, gomock.Any(), cfg.Redis.CacheTTL).
 					Return(nil)
 			},
 			want:    &models.EventResponse{Id: 2, Title: "DB Event"},
@@ -187,7 +185,7 @@ func TestEventService_GetById(t *testing.T) {
 			id:   3,
 			setup: func() {
 				mockCache.EXPECT().
-					GetBytes(ctx, "event:3").
+					GetEvent(ctx, 3).
 					Return(nil, assert.AnError)
 
 				mockRepo.EXPECT().
@@ -202,7 +200,7 @@ func TestEventService_GetById(t *testing.T) {
 			id:   4,
 			setup: func() {
 				mockCache.EXPECT().
-					GetBytes(ctx, "event:4").
+					GetEvent(ctx, 4).
 					Return(nil, assert.AnError)
 
 				mockRepo.EXPECT().
