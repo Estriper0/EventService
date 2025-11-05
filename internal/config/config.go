@@ -9,10 +9,10 @@ import (
 )
 
 type Config struct {
-	Env      string        `mapstructure:"env"`
-	Port     int           `mapstructure:"port"`
-	DB       Database      `mapstructure:"database"`
-	Redis    Redis         `mapstructure:"redis"`
+	Env   string   `mapstructure:"env"`
+	Port  int      `mapstructure:"port"`
+	DB    Database `mapstructure:"database"`
+	Redis Redis    `mapstructure:"redis"`
 }
 
 type Database struct {
@@ -47,13 +47,8 @@ func New() *Config {
 	viper.SetDefault("database.dbport", 5432)
 	viper.SetDefault("database.dbhost", "localhost")
 
-	viper.BindEnv("database.dbhost", "DB_HOST")
-	viper.BindEnv("database.dbport", "DB_PORT")
-	viper.BindEnv("database.dbname", "DB_NAME")
-	viper.BindEnv("database.dbuser", "DB_USER")
-	viper.BindEnv("database.dbpassword", "DB_PASSWORD")
-	viper.BindEnv("redis.addr", "REDIS_ADDR")
-	viper.BindEnv("redis.password", "REDIS_PASSWORD")
+	BindEnv()
+
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -66,4 +61,15 @@ func New() *Config {
 	}
 
 	return &config
+}
+
+func BindEnv() {
+	viper.BindEnv("database.dbhost", "DB_HOST")
+	viper.BindEnv("database.dbport", "DB_PORT")
+	viper.BindEnv("database.dbname", "DB_NAME")
+	viper.BindEnv("database.dbuser", "DB_USER")
+	viper.BindEnv("database.dbpassword", "DB_PASSWORD")
+
+	viper.BindEnv("redis.addr", "REDIS_ADDR")
+	viper.BindEnv("redis.password", "REDIS_PASSWORD")
 }
