@@ -44,6 +44,7 @@ func (s *EventGRPCService) GetAll(
 			Location:     event.Location,
 			Status:       string(event.Status),
 			MaxAttendees: int32(event.MaxAttendees),
+			CurrentAttendance: int32(event.CurrentAttendance),
 			Creator:      event.Creator,
 		}
 		response.Events = append(response.Events, pb_event)
@@ -70,6 +71,7 @@ func (s *EventGRPCService) GetById(
 		Location:     event.Location,
 		Status:       string(event.Status),
 		MaxAttendees: int32(event.MaxAttendees),
+		CurrentAttendance: int32(event.CurrentAttendance),
 		Creator:      event.Creator,
 	}, nil
 }
@@ -168,6 +170,7 @@ func (s *EventGRPCService) GetAllByCreator(
 			Location:     event.Location,
 			Status:       string(event.Status),
 			MaxAttendees: int32(event.MaxAttendees),
+			CurrentAttendance: int32(event.CurrentAttendance),
 			Creator:      event.Creator,
 		}
 		response.Events = append(response.Events, pb_event)
@@ -191,14 +194,15 @@ func (s *EventGRPCService) GetAllByStatus(
 	}
 	for _, event := range events {
 		pb_event := &pb.EventElem{
-			Id:           int64(event.Id),
-			Title:        event.Title,
-			About:        event.About,
-			StartDate:    timestamppb.New(event.StartDate),
-			Location:     event.Location,
-			Status:       string(event.Status),
-			MaxAttendees: int32(event.MaxAttendees),
-			Creator:      event.Creator,
+			Id:                int64(event.Id),
+			Title:             event.Title,
+			About:             event.About,
+			StartDate:         timestamppb.New(event.StartDate),
+			Location:          event.Location,
+			Status:            string(event.Status),
+			MaxAttendees:      int32(event.MaxAttendees),
+			CurrentAttendance: int32(event.CurrentAttendance),
+			Creator:           event.Creator,
 		}
 		response.Events = append(response.Events, pb_event)
 	}

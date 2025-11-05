@@ -34,12 +34,13 @@ type EventCreateRequest struct {
 }
 
 type EventResponse struct {
-	Id           int
-	Title        string
-	About        string
-	StartDate    time.Time
-	Location     string
-	Status       string
-	MaxAttendees int
-	Creator      string
+	Id                int
+	Title             string
+	About             string
+	StartDate         time.Time
+	Location          string
+	Status            string
+	MaxAttendees      int
+	CurrentAttendance int
+	Creator           string
 }

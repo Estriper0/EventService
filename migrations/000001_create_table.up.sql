@@ -15,5 +15,6 @@ CREATE TABLE events (
     location VARCHAR(255),
     status event_status NOT NULL,
     max_attendees SMALLINT,
+    current_attendance SMALLINT DEFAULT 0,
     creator UUID NOT NULL
 );

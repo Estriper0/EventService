@@ -33,6 +33,7 @@ func (r *EventRepository) GetById(
 		&event.Location,
 		&event.Status,
 		&event.MaxAttendees,
+		&event.CurrentAttendance,
 		&event.Creator,
 	)
 
@@ -68,6 +69,7 @@ func (r *EventRepository) GetAll(
 			&event.Location,
 			&event.Status,
 			&event.MaxAttendees,
+			&event.CurrentAttendance,
 			&event.Creator,
 		)
 		if err != nil {
@@ -175,6 +177,7 @@ func (r *EventRepository) GetAllByCreator(
 			&event.Location,
 			&event.Status,
 			&event.MaxAttendees,
+			&event.CurrentAttendance,
 			&event.Creator,
 		)
 		if err != nil {
@@ -212,6 +215,7 @@ func (r *EventRepository) GetAllByStatus(
 			&event.Location,
 			&event.Status,
 			&event.MaxAttendees,
+			&event.CurrentAttendance,
 			&event.Creator,
 		)
 		if err != nil {
