@@ -7,7 +7,6 @@ import (
 
 	"github.com/Estriper0/EventService/internal/models"
 	"github.com/Estriper0/EventService/internal/repositories"
-	sq "github.com/Masterminds/squirrel"
 )
 
 type EventRepository struct {
@@ -128,21 +127,19 @@ func (r *EventRepository) Update(
 	ctx context.Context,
 	event *models.EventUpdateRequest,
 ) error {
-	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-	statement := psql.Update("events").Where(sq.Eq{"id": event.Id})
-	statement = statement.Set("title", event.Title)
-	statement = statement.Set("about", event.About)
-	statement = statement.Set("start_date", event.StartDate)
-	statement = statement.Set("location", event.Location)
-	statement = statement.Set("status", event.Status)
-	statement = statement.Set("max_attendees", event.MaxAttendees)
+	query := "UPDATE events SET title = $1, about = $2, start_date = $3, location = $4, status = $5, max_attendees = $6 WHERE id = $7"
+	res, err := r.db.ExecContext(
+		ctx,
+		query,
+		event.Title,
+		event.About,
+		event.StartDate,
+		event.Location,
+		event.Status,
+		event.MaxAttendees,
+		event.Id,
+	)
 
-	sql, args, err := statement.ToSql()
-	if err != nil {
-		return err
-	}
-
-	res, err := r.db.ExecContext(ctx, sql, args...)
 	if err != nil {
 		return repositories.ErrRecordNotFound
 	}
