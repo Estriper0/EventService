@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"strconv"
 
+	pb "github.com/Estriper0/protobuf/gen/event"
+
 	"github.com/Estriper0/EventService/internal/cache"
 	"github.com/Estriper0/EventService/internal/config"
 	"github.com/Estriper0/EventService/internal/models"
@@ -14,18 +16,20 @@ import (
 )
 
 type EventService struct {
-	eventRepo repositories.IEventRepository
-	cache     cache.Cache
-	logger    *slog.Logger
-	config    *config.Config
+	eventRepo     repositories.IEventRepository
+	eventUserRepo repositories.IEventUserRepository
+	cache         cache.Cache
+	logger        *slog.Logger
+	config        *config.Config
 }
 
-func New(repo repositories.IEventRepository, cache cache.Cache, logger *slog.Logger, config *config.Config) *EventService {
+func New(repo repositories.IEventRepository, eventUserRepo repositories.IEventUserRepository, cache cache.Cache, logger *slog.Logger, config *config.Config) *EventService {
 	return &EventService{
-		eventRepo: repo,
-		cache:     cache,
-		logger:    logger,
-		config:    config,
+		eventRepo:     repo,
+		eventUserRepo: eventUserRepo,
+		cache:         cache,
+		logger:        logger,
+		config:        config,
 	}
 }
 
@@ -204,4 +208,140 @@ func (s *EventService) GetAllByStatus(ctx context.Context, status string) ([]*mo
 		slog.String("status", status),
 	)
 	return events, nil
+}
+
+func (s *EventService) Register(ctx context.Context, user_id string, event_id int) error {
+	ok, err := s.eventUserRepo.Exists(ctx, user_id, event_id)
+	if err != nil {
+		s.logger.Error(
+			"Error registered user in event",
+			slog.String("err", err.Error()),
+		)
+		return service.ErrRepositoryError
+	} else if ok {
+		s.logger.Info(
+			"User is already registered",
+		)
+		return service.ErrRegistered
+	}
+
+	err = s.eventRepo.IncreaseCurrentAttedance(ctx, event_id)
+	if err != nil {
+		if errors.Is(err, repositories.ErrMaxRegistered) {
+			s.logger.Info(
+				"Maximum number of users",
+			)
+			return service.ErrMaxRegistered
+		} else if errors.Is(err, repositories.ErrRecordNotFound) {
+			s.logger.Info(
+				"Event not found",
+			)
+			return service.ErrRecordNotFound
+		}
+		s.logger.Error(
+			"Error registered user in event",
+			slog.String("err", err.Error()),
+		)
+		return err
+	}
+
+	err = s.eventUserRepo.Create(ctx, user_id, event_id)
+	if err != nil {
+		s.logger.Error(
+			"Registered user error in event",
+			slog.String("err", err.Error()),
+		)
+		return service.ErrRepositoryError
+	}
+	s.logger.Info(
+		"Successful registered user in event",
+		slog.String("user_id", user_id),
+		slog.Int("event_id", event_id),
+	)
+	return nil
+}
+
+func (s *EventService) CancellRegister(ctx context.Context, user_id string, event_id int) error {
+	ok, err := s.eventUserRepo.Exists(ctx, user_id, event_id)
+	if err != nil {
+		s.logger.Error(
+			"Error unregistering user from event",
+			slog.String("err", err.Error()),
+		)
+		return service.ErrRepositoryError
+	} else if !ok {
+		s.logger.Info(
+			"User is not registered",
+		)
+		return service.ErrNotRegistered
+	}
+
+	err = s.eventRepo.DecreaseCurrentAttedance(ctx, event_id)
+	if err != nil {
+		if errors.Is(err, repositories.ErrRecordNotFound) {
+			s.logger.Info(
+				"Event not found",
+			)
+			return service.ErrRecordNotFound
+		}
+		s.logger.Error(
+			"Error unregistering user from event",
+			slog.String("err", err.Error()),
+		)
+		return service.ErrRepositoryError
+	}
+	err = s.eventUserRepo.Delete(ctx, user_id, event_id)
+	if err != nil {
+		if errors.Is(err, repositories.ErrRecordNotFound) {
+			s.logger.Info(
+				"Event not found",
+			)
+			return service.ErrRecordNotFound
+		}
+		s.logger.Error(
+			"Error unregistering user from event",
+			slog.String("err", err.Error()),
+		)
+		return service.ErrRepositoryError
+	}
+	s.logger.Info(
+		"Successful unregistered user in event",
+		slog.String("user_id", user_id),
+		slog.Int("event_id", event_id),
+	)
+	return nil
+}
+
+func (s *EventService) GetAllByUser(ctx context.Context, user_id string) (*pb.GetAllByUserResponse, error) {
+	events, err := s.eventRepo.GetAllByUser(ctx, user_id)
+	if err != nil {
+		s.logger.Error(
+			"Error getting all events by user",
+			slog.String("user", user_id),
+			slog.String("err", err.Error()),
+		)
+		return nil, service.ErrRepositoryError
+	}
+	s.logger.Info(
+		"Successful getting all events by user",
+		slog.String("user", user_id),
+	)
+	return events, nil
+}
+
+func (s *EventService) GetAllUsersByEvent(ctx context.Context, event_id int) (*pb.GetAllUsersByEventResponse, error) {
+	users_id, err := s.eventUserRepo.GetAllByEvent(ctx, event_id)
+	if err != nil {
+		s.logger.Error(
+			"Error getting all users by event",
+			slog.Int("event", event_id),
+			slog.String("err", err.Error()),
+		)
+		return nil, service.ErrRepositoryError
+	}
+	s.logger.Info(
+		"Successful getting all users by event",
+		slog.Int("event", event_id),
+	)
+	return users_id, nil
 }

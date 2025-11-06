@@ -37,15 +37,15 @@ func (s *EventGRPCService) GetAll(
 	}
 	for _, event := range events {
 		pb_event := &pb.EventElem{
-			Id:           int64(event.Id),
-			Title:        event.Title,
-			About:        event.About,
-			StartDate:    timestamppb.New(event.StartDate),
-			Location:     event.Location,
-			Status:       string(event.Status),
-			MaxAttendees: int32(event.MaxAttendees),
+			Id:                int64(event.Id),
+			Title:             event.Title,
+			About:             event.About,
+			StartDate:         timestamppb.New(event.StartDate),
+			Location:          event.Location,
+			Status:            string(event.Status),
+			MaxAttendees:      int32(event.MaxAttendees),
 			CurrentAttendance: int32(event.CurrentAttendance),
-			Creator:      event.Creator,
+			Creator:           event.Creator,
 		}
 		response.Events = append(response.Events, pb_event)
 	}
@@ -64,15 +64,15 @@ func (s *EventGRPCService) GetById(
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	return &pb.GetByIdResponse{
-		Id:           int64(event.Id),
-		Title:        event.Title,
-		About:        event.About,
-		StartDate:    timestamppb.New(event.StartDate),
-		Location:     event.Location,
-		Status:       string(event.Status),
-		MaxAttendees: int32(event.MaxAttendees),
+		Id:                int64(event.Id),
+		Title:             event.Title,
+		About:             event.About,
+		StartDate:         timestamppb.New(event.StartDate),
+		Location:          event.Location,
+		Status:            string(event.Status),
+		MaxAttendees:      int32(event.MaxAttendees),
 		CurrentAttendance: int32(event.CurrentAttendance),
-		Creator:      event.Creator,
+		Creator:           event.Creator,
 	}, nil
 }
 
@@ -163,15 +163,15 @@ func (s *EventGRPCService) GetAllByCreator(
 	}
 	for _, event := range events {
 		pb_event := &pb.EventElem{
-			Id:           int64(event.Id),
-			Title:        event.Title,
-			About:        event.About,
-			StartDate:    timestamppb.New(event.StartDate),
-			Location:     event.Location,
-			Status:       string(event.Status),
-			MaxAttendees: int32(event.MaxAttendees),
+			Id:                int64(event.Id),
+			Title:             event.Title,
+			About:             event.About,
+			StartDate:         timestamppb.New(event.StartDate),
+			Location:          event.Location,
+			Status:            string(event.Status),
+			MaxAttendees:      int32(event.MaxAttendees),
 			CurrentAttendance: int32(event.CurrentAttendance),
-			Creator:      event.Creator,
+			Creator:           event.Creator,
 		}
 		response.Events = append(response.Events, pb_event)
 	}
@@ -207,4 +207,63 @@ func (s *EventGRPCService) GetAllByStatus(
 		response.Events = append(response.Events, pb_event)
 	}
 	return response, nil
+}
+
+func (s *EventGRPCService) Register(
+	ctx context.Context,
+	req *pb.RegisterRequest,
+) (*pb.EmptyResponse, error) {
+	err := s.eventService.Register(ctx, req.UserId, int(req.EventId))
+	if err != nil {
+		if errors.Is(err, service.ErrMaxRegistered) {
+			return nil, status.Error(codes.ResourceExhausted, err.Error())
+		}
+		if errors.Is(err, service.ErrRegistered) {
+			return nil, status.Error(codes.AlreadyExists, err.Error())
+		}
+		if errors.Is(err, service.ErrRecordNotFound) {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+	return &pb.EmptyResponse{}, nil
+}
+
+func (s *EventGRPCService) CancellRegister(
+	ctx context.Context,
+	req *pb.CancellRegisterRequest,
+) (*pb.EmptyResponse, error) {
+	err := s.eventService.CancellRegister(ctx, req.UserId, int(req.EventId))
+	if err != nil {
+		if errors.Is(err, service.ErrNotRegistered) {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+		if errors.Is(err, service.ErrRecordNotFound) {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+	return &pb.EmptyResponse{}, nil
+}
+
+func (s *EventGRPCService) GetAllByUser(
+	ctx context.Context,
+	req *pb.GetAllByUserRequest,
+) (*pb.GetAllByUserResponse, error) {
+	resp, err := s.eventService.GetAllByUser(ctx, req.UserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+	return resp, nil
+}
+
+func (s *EventGRPCService) GetAllUsersByEvent(
+	ctx context.Context,
+	req *pb.GetAllUsersByEventRequest,
+) (*pb.GetAllUsersByEventResponse, error) {
+	resp, err := s.eventService.GetAllUsersByEvent(ctx, int(req.EventId))
+	if err != nil {
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+	return resp, nil
 }

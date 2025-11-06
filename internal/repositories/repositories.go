@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Estriper0/EventService/internal/models"
+	pb "github.com/Estriper0/protobuf/gen/event"
 )
 
 type IEventRepository interface {
@@ -34,4 +35,38 @@ type IEventRepository interface {
 		ctx context.Context,
 		event *models.EventUpdateRequest,
 	) error
+	IncreaseCurrentAttedance(
+		ctx context.Context,
+		event_id int,
+	) error
+	DecreaseCurrentAttedance(
+		ctx context.Context,
+		event_id int,
+	) error
+	GetAllByUser(
+		ctx context.Context,
+		user_id string,
+	) (*pb.GetAllByUserResponse, error)
+}
+
+type IEventUserRepository interface {
+	Exists(
+		ctx context.Context,
+		user_id string,
+		event_id int,
+	) (bool, error)
+	Create(
+		ctx context.Context,
+		user_id string,
+		event_id int,
+	) error
+	Delete(
+		ctx context.Context,
+		user_id string,
+		event_id int,
+	) error
+	GetAllByEvent(
+		ctx context.Context,
+		event_id int,
+	) (*pb.GetAllUsersByEventResponse, error)
 }

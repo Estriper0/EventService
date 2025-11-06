@@ -8,6 +8,7 @@ import (
 	"github.com/Estriper0/EventService/internal/config"
 	db "github.com/Estriper0/EventService/internal/repositories/database"
 	event_repo "github.com/Estriper0/EventService/internal/repositories/database/event"
+	eventuser "github.com/Estriper0/EventService/internal/repositories/database/event_user"
 	"github.com/Estriper0/EventService/internal/server"
 	event_service "github.com/Estriper0/EventService/internal/service/event"
 	"github.com/redis/go-redis/v9"
@@ -27,9 +28,10 @@ func New(
 	db := db.GetDB(&config.DB)
 
 	eventRepo := event_repo.New(db)
+	eventUserRepo := eventuser.New(db)
 	redisClient := redis.NewClient(&redis.Options{Addr: config.Redis.Addr, Password: config.Redis.Password})
 	cache := rd.New(redisClient)
-	eventService := event_service.New(eventRepo, cache, logger, config)
+	eventService := event_service.New(eventRepo, eventUserRepo, cache, logger, config)
 	grpcServer := server.New(logger, config, eventService)
 
 	return &App{

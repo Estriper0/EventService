@@ -4,6 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
+
+	pb "github.com/Estriper0/protobuf/gen/event"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/Estriper0/EventService/internal/models"
 	"github.com/Estriper0/EventService/internal/repositories"
@@ -228,4 +232,69 @@ func (r *EventRepository) GetAllByStatus(
 		return nil, err
 	}
 	return res, nil
+}
+
+func (r *EventRepository) IncreaseCurrentAttedance(ctx context.Context, event_id int) error {
+	query := "UPDATE events SET current_attendance = current_attendance + 1 WHERE id = $1"
+	res, err := r.db.ExecContext(ctx, query, event_id)
+
+	if err != nil {
+		return repositories.ErrMaxRegistered
+	}
+
+	i, _ := res.RowsAffected()
+	if i == 0 {
+		return repositories.ErrRecordNotFound
+	}
+
+	return nil
+}
+
+func (r *EventRepository) DecreaseCurrentAttedance(ctx context.Context, event_id int) error {
+	query := "UPDATE events SET current_attendance = current_attendance - 1 WHERE id = $1"
+	res, err := r.db.ExecContext(ctx, query, event_id)
+
+	if err != nil {
+		return err
+	}
+
+	i, _ := res.RowsAffected()
+	if i == 0 {
+		return repositories.ErrRecordNotFound
+	}
+
+	return nil
+}
+
+func (r *EventRepository) GetAllByUser(ctx context.Context, user_id string) (*pb.GetAllByUserResponse, error) {
+	query := "SELECT events.* FROM events JOIN event_user ON events.id = event_user.event_id WHERE event_user.user_id = $1"
+	rows, err := r.db.QueryContext(ctx, query, user_id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var events pb.GetAllByUserResponse
+
+	for rows.Next() {
+		event := &pb.EventElem{}
+		var time time.Time
+		err := rows.Scan(
+			&event.Id,
+			&event.Title,
+			&event.About,
+			&time,
+			&event.Location,
+			&event.Status,
+			&event.MaxAttendees,
+			&event.CurrentAttendance,
+			&event.Creator,
+		)
+		if err != nil {
+			return nil, err
+		}
+		event.StartDate = timestamppb.New(time)
+		events.Events = append(events.Events, event)
+	}
+	return &events, nil
 }

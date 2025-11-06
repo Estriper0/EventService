@@ -21,11 +21,12 @@ func TestEventService_GetAll(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocksRepo.NewMockIEventRepository(ctrl)
+	mockEURepo := mocksRepo.NewMockIEventUserRepository(ctrl)
 	mockCache := mocks.NewMockCache(ctrl)
 	logger := logger.GetLogger("test")
 	cfg := &config.Config{Redis: config.Redis{CacheTTL: time.Hour}}
 
-	eventService := New(mockRepo, mockCache, logger, cfg)
+	eventService := New(mockRepo, mockEURepo, mockCache, logger, cfg)
 
 	ctx := context.Background()
 
@@ -78,11 +79,12 @@ func TestEventService_Create(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocksRepo.NewMockIEventRepository(ctrl)
+	mockEURepo := mocksRepo.NewMockIEventUserRepository(ctrl)
 	mockCache := mocks.NewMockCache(ctrl)
 	logger := logger.GetLogger("test")
 	cfg := &config.Config{Redis: config.Redis{CacheTTL: time.Hour}}
 
-	eventService := New(mockRepo, mockCache, logger, cfg)
+	eventService := New(mockRepo, mockEURepo, mockCache, logger, cfg)
 
 	ctx := context.Background()
 	req := &models.EventCreateRequest{Title: "New Event"}
@@ -134,11 +136,12 @@ func TestEventService_GetById(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocksRepo.NewMockIEventRepository(ctrl)
+	mockEURepo := mocksRepo.NewMockIEventUserRepository(ctrl)
 	mockCache := mocks.NewMockCache(ctrl)
 	logger := logger.GetLogger("test")
 	cfg := &config.Config{Redis: config.Redis{CacheTTL: time.Minute}}
 
-	eventService := New(mockRepo, mockCache, logger, cfg)
+	eventService := New(mockRepo, mockEURepo, mockCache, logger, cfg)
 
 	ctx := context.Background()
 	event := &models.EventResponse{Id: 1, Title: "Event"}
@@ -231,11 +234,12 @@ func TestEventService_DeleteById(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocksRepo.NewMockIEventRepository(ctrl)
+	mockEURepo := mocksRepo.NewMockIEventUserRepository(ctrl)
 	mockCache := mocks.NewMockCache(ctrl)
 	logger := logger.GetLogger("test")
 	cfg := &config.Config{Redis: config.Redis{CacheTTL: time.Hour}}
 
-	eventService := New(mockRepo, mockCache, logger, cfg)
+	eventService := New(mockRepo, mockEURepo, mockCache, logger, cfg)
 
 	ctx := context.Background()
 
@@ -296,11 +300,12 @@ func TestEventService_Update(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocksRepo.NewMockIEventRepository(ctrl)
+	mockEURepo := mocksRepo.NewMockIEventUserRepository(ctrl)
 	mockCache := mocks.NewMockCache(ctrl)
 	logger := logger.GetLogger("test")
 	cfg := &config.Config{Redis: config.Redis{CacheTTL: time.Hour}}
 
-	eventService := New(mockRepo, mockCache, logger, cfg)
+	eventService := New(mockRepo, mockEURepo, mockCache, logger, cfg)
 
 	ctx := context.Background()
 	req := &models.EventUpdateRequest{Id: 1, Title: "Updated"}
@@ -362,11 +367,12 @@ func TestEventService_GetAllByCreator(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocksRepo.NewMockIEventRepository(ctrl)
+	mockEURepo := mocksRepo.NewMockIEventUserRepository(ctrl)
 	mockCache := mocks.NewMockCache(ctrl)
 	logger := logger.GetLogger("test")
 	cfg := &config.Config{Redis: config.Redis{CacheTTL: time.Hour}}
 
-	eventService := New(mockRepo, mockCache, logger, cfg)
+	eventService := New(mockRepo, mockEURepo, mockCache, logger, cfg)
 
 	ctx := context.Background()
 
@@ -420,11 +426,12 @@ func TestEventService_GetAllByStatus(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockRepo := mocksRepo.NewMockIEventRepository(ctrl)
+	mockEURepo := mocksRepo.NewMockIEventUserRepository(ctrl)
 	mockCache := mocks.NewMockCache(ctrl)
 	logger := logger.GetLogger("test")
 	cfg := &config.Config{Redis: config.Redis{CacheTTL: time.Hour}}
 
-	eventService := New(mockRepo, mockCache, logger, cfg)
+	eventService := New(mockRepo, mockEURepo, mockCache, logger, cfg)
 
 	ctx := context.Background()
 

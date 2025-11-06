@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	models "github.com/Estriper0/EventService/internal/models"
+	event "github.com/Estriper0/protobuf/gen/event"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -33,6 +34,20 @@ func NewMockIEventService(ctrl *gomock.Controller) *MockIEventService {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockIEventService) EXPECT() *MockIEventServiceMockRecorder {
 	return m.recorder
+}
+
+// CancellRegister mocks base method.
+func (m *MockIEventService) CancellRegister(ctx context.Context, user_id string, event_id int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CancellRegister", ctx, user_id, event_id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CancellRegister indicates an expected call of CancellRegister.
+func (mr *MockIEventServiceMockRecorder) CancellRegister(ctx, user_id, event_id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CancellRegister", reflect.TypeOf((*MockIEventService)(nil).CancellRegister), ctx, user_id, event_id)
 }
 
 // Create mocks base method.
@@ -109,6 +124,36 @@ func (mr *MockIEventServiceMockRecorder) GetAllByStatus(ctx, status interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllByStatus", reflect.TypeOf((*MockIEventService)(nil).GetAllByStatus), ctx, status)
 }
 
+// GetAllByUser mocks base method.
+func (m *MockIEventService) GetAllByUser(ctx context.Context, user_id string) (*event.GetAllByUserResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllByUser", ctx, user_id)
+	ret0, _ := ret[0].(*event.GetAllByUserResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllByUser indicates an expected call of GetAllByUser.
+func (mr *MockIEventServiceMockRecorder) GetAllByUser(ctx, user_id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllByUser", reflect.TypeOf((*MockIEventService)(nil).GetAllByUser), ctx, user_id)
+}
+
+// GetAllUsersByEvent mocks base method.
+func (m *MockIEventService) GetAllUsersByEvent(ctx context.Context, event_id int) (*event.GetAllUsersByEventResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllUsersByEvent", ctx, event_id)
+	ret0, _ := ret[0].(*event.GetAllUsersByEventResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllUsersByEvent indicates an expected call of GetAllUsersByEvent.
+func (mr *MockIEventServiceMockRecorder) GetAllUsersByEvent(ctx, event_id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllUsersByEvent", reflect.TypeOf((*MockIEventService)(nil).GetAllUsersByEvent), ctx, event_id)
+}
+
 // GetById mocks base method.
 func (m *MockIEventService) GetById(ctx context.Context, id int) (*models.EventResponse, error) {
 	m.ctrl.T.Helper()
@@ -122,6 +167,20 @@ func (m *MockIEventService) GetById(ctx context.Context, id int) (*models.EventR
 func (mr *MockIEventServiceMockRecorder) GetById(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockIEventService)(nil).GetById), ctx, id)
+}
+
+// Register mocks base method.
+func (m *MockIEventService) Register(ctx context.Context, user_id string, event_id int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Register", ctx, user_id, event_id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Register indicates an expected call of Register.
+func (mr *MockIEventServiceMockRecorder) Register(ctx, user_id, event_id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Register", reflect.TypeOf((*MockIEventService)(nil).Register), ctx, user_id, event_id)
 }
 
 // Update mocks base method.

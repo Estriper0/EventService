@@ -3,7 +3,7 @@ module github.com/Estriper0/EventService
 go 1.25.1
 
 require (
-	github.com/Estriper0/protobuf v0.0.10
+	github.com/Estriper0/protobuf v0.0.12
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/golang-migrate/migrate/v4 v4.19.0
 	github.com/golang/mock v1.6.0

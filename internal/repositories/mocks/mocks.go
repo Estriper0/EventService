@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	models "github.com/Estriper0/EventService/internal/models"
+	event "github.com/Estriper0/protobuf/gen/event"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -48,6 +49,20 @@ func (m *MockIEventRepository) Create(ctx context.Context, event *models.EventCr
 func (mr *MockIEventRepositoryMockRecorder) Create(ctx, event interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockIEventRepository)(nil).Create), ctx, event)
+}
+
+// DecreaseCurrentAttedance mocks base method.
+func (m *MockIEventRepository) DecreaseCurrentAttedance(ctx context.Context, event_id int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DecreaseCurrentAttedance", ctx, event_id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DecreaseCurrentAttedance indicates an expected call of DecreaseCurrentAttedance.
+func (mr *MockIEventRepositoryMockRecorder) DecreaseCurrentAttedance(ctx, event_id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DecreaseCurrentAttedance", reflect.TypeOf((*MockIEventRepository)(nil).DecreaseCurrentAttedance), ctx, event_id)
 }
 
 // DeleteById mocks base method.
@@ -109,6 +124,21 @@ func (mr *MockIEventRepositoryMockRecorder) GetAllByStatus(ctx, status interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllByStatus", reflect.TypeOf((*MockIEventRepository)(nil).GetAllByStatus), ctx, status)
 }
 
+// GetAllByUser mocks base method.
+func (m *MockIEventRepository) GetAllByUser(ctx context.Context, user_id string) (*event.GetAllByUserResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllByUser", ctx, user_id)
+	ret0, _ := ret[0].(*event.GetAllByUserResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllByUser indicates an expected call of GetAllByUser.
+func (mr *MockIEventRepositoryMockRecorder) GetAllByUser(ctx, user_id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllByUser", reflect.TypeOf((*MockIEventRepository)(nil).GetAllByUser), ctx, user_id)
+}
+
 // GetById mocks base method.
 func (m *MockIEventRepository) GetById(ctx context.Context, id int) (*models.EventResponse, error) {
 	m.ctrl.T.Helper()
@@ -124,6 +154,20 @@ func (mr *MockIEventRepositoryMockRecorder) GetById(ctx, id interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockIEventRepository)(nil).GetById), ctx, id)
 }
 
+// IncreaseCurrentAttedance mocks base method.
+func (m *MockIEventRepository) IncreaseCurrentAttedance(ctx context.Context, event_id int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IncreaseCurrentAttedance", ctx, event_id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// IncreaseCurrentAttedance indicates an expected call of IncreaseCurrentAttedance.
+func (mr *MockIEventRepositoryMockRecorder) IncreaseCurrentAttedance(ctx, event_id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IncreaseCurrentAttedance", reflect.TypeOf((*MockIEventRepository)(nil).IncreaseCurrentAttedance), ctx, event_id)
+}
+
 // Update mocks base method.
 func (m *MockIEventRepository) Update(ctx context.Context, event *models.EventUpdateRequest) error {
 	m.ctrl.T.Helper()
@@ -136,4 +180,85 @@ func (m *MockIEventRepository) Update(ctx context.Context, event *models.EventUp
 func (mr *MockIEventRepositoryMockRecorder) Update(ctx, event interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockIEventRepository)(nil).Update), ctx, event)
+}
+
+// MockIEventUserRepository is a mock of IEventUserRepository interface.
+type MockIEventUserRepository struct {
+	ctrl     *gomock.Controller
+	recorder *MockIEventUserRepositoryMockRecorder
+}
+
+// MockIEventUserRepositoryMockRecorder is the mock recorder for MockIEventUserRepository.
+type MockIEventUserRepositoryMockRecorder struct {
+	mock *MockIEventUserRepository
+}
+
+// NewMockIEventUserRepository creates a new mock instance.
+func NewMockIEventUserRepository(ctrl *gomock.Controller) *MockIEventUserRepository {
+	mock := &MockIEventUserRepository{ctrl: ctrl}
+	mock.recorder = &MockIEventUserRepositoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockIEventUserRepository) EXPECT() *MockIEventUserRepositoryMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockIEventUserRepository) Create(ctx context.Context, user_id string, event_id int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, user_id, event_id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockIEventUserRepositoryMockRecorder) Create(ctx, user_id, event_id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockIEventUserRepository)(nil).Create), ctx, user_id, event_id)
+}
+
+// Delete mocks base method.
+func (m *MockIEventUserRepository) Delete(ctx context.Context, user_id string, event_id int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, user_id, event_id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockIEventUserRepositoryMockRecorder) Delete(ctx, user_id, event_id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIEventUserRepository)(nil).Delete), ctx, user_id, event_id)
+}
+
+// Exists mocks base method.
+func (m *MockIEventUserRepository) Exists(ctx context.Context, user_id string, event_id int) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Exists", ctx, user_id, event_id)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Exists indicates an expected call of Exists.
+func (mr *MockIEventUserRepositoryMockRecorder) Exists(ctx, user_id, event_id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exists", reflect.TypeOf((*MockIEventUserRepository)(nil).Exists), ctx, user_id, event_id)
+}
+
+// GetAllByEvent mocks base method.
+func (m *MockIEventUserRepository) GetAllByEvent(ctx context.Context, event_id int) (*event.GetAllUsersByEventResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllByEvent", ctx, event_id)
+	ret0, _ := ret[0].(*event.GetAllUsersByEventResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllByEvent indicates an expected call of GetAllByEvent.
+func (mr *MockIEventUserRepositoryMockRecorder) GetAllByEvent(ctx, event_id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllByEvent", reflect.TypeOf((*MockIEventUserRepository)(nil).GetAllByEvent), ctx, event_id)
 }
