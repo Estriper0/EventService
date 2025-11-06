@@ -21,9 +21,10 @@ func New(db *sql.DB) *EventUserRepository {
 }
 
 func (r *EventUserRepository) Exists(ctx context.Context, user_id string, event_id int) (bool, error) {
-	query := "SELECT * FROM event_user WHERE user_id = $1 AND event_id = $2"
-	var tmp int
-	err := r.db.QueryRowContext(ctx, query, user_id, event_id).Scan(&tmp, &tmp)
+	query := "SELECT user_id, event_id FROM event_user WHERE user_id = $1 AND event_id = $2"
+	var ui string
+	var ei int
+	err := r.db.QueryRowContext(ctx, query, user_id, event_id).Scan(&ui, &ei)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return false, nil
