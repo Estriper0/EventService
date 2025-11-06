@@ -213,7 +213,11 @@ func (s *EventGRPCService) Register(
 	ctx context.Context,
 	req *pb.RegisterRequest,
 ) (*pb.EmptyResponse, error) {
-	err := s.eventService.Register(ctx, req.UserId, int(req.EventId))
+	err := s.validate.Var(req.UserId, "uuid,required")
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	err = s.eventService.Register(ctx, req.UserId, int(req.EventId))
 	if err != nil {
 		if errors.Is(err, service.ErrMaxRegistered) {
 			return nil, status.Error(codes.ResourceExhausted, err.Error())
@@ -233,7 +237,11 @@ func (s *EventGRPCService) CancellRegister(
 	ctx context.Context,
 	req *pb.CancellRegisterRequest,
 ) (*pb.EmptyResponse, error) {
-	err := s.eventService.CancellRegister(ctx, req.UserId, int(req.EventId))
+	err := s.validate.Var(req.UserId, "uuid,required")
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	err = s.eventService.CancellRegister(ctx, req.UserId, int(req.EventId))
 	if err != nil {
 		if errors.Is(err, service.ErrNotRegistered) {
 			return nil, status.Error(codes.NotFound, err.Error())
@@ -250,6 +258,10 @@ func (s *EventGRPCService) GetAllByUser(
 	ctx context.Context,
 	req *pb.GetAllByUserRequest,
 ) (*pb.GetAllByUserResponse, error) {
+	err := s.validate.Var(req.UserId, "uuid,required")
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 	resp, err := s.eventService.GetAllByUser(ctx, req.UserId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "internal error")
