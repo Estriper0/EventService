@@ -16,17 +16,22 @@
 
 ---
 
-## API (gRPC)
+## gRPC
 
 | Метод | Описание | Запрос | Ответ |
-|------|---------|-------|-------|
-| `GetAll` | Все события | `EmptyRequest` | `GetAllResponse` |
-| `GetById` | По ID | `GetByIdRequest` | `GetByIdResponse` |
-| `GetAllByCreator` | По создателю (UUID) | `GetAllByCreatorRequest` | `GetAllResponse` |
-| `GetAllByStatus` | По статусу | `GetAllByStatusRequest` | `GetAllResponse` |
-| `Create` | Создать | `CreateRequest` | `CreateResponse` |
-| `Update` | Обновить | `UpdateRequest` | `EmptyResponse` |
-| `DeleteById` | Удалить | `DeleteByIdRequest` | `DeleteByIdResponse` |
+|------|---------|--------|-------|
+| `GetAll` | Получить все события | `EmptyRequest` | `GetAllResponse` |
+| `GetAllByCreator` | Получить все события по создателю (UUID) | `GetAllByCreatorRequest` | `GetAllResponse` |
+| `GetAllByStatus` | Получить все события по статусу | `GetAllByStatusRequest` | `GetAllResponse` |
+| `GetById` | Получить событие по ID | `GetByIdRequest` | `GetByIdResponse` |
+| `Create` | Создать новое событие | `CreateRequest` | `CreateResponse` |
+| `DeleteById` | Удалить событие по ID | `DeleteByIdRequest` | `DeleteByIdResponse` |
+| `Update` | Обновить событие | `UpdateRequest` | `EmptyResponse` |
+| `Register` | Зарегистрироваться на событие | `RegisterRequest` | `EmptyResponse` |
+| `CancellRegister` | Отменить регистрацию на событие | `CancellRegisterRequest` | `EmptyResponse` |
+| `GetAllByUser` | Получить все события, на которые зарегистрирован пользователь | `GetAllByUserRequest` | `GetAllByUserResponse` |
+| `GetAllUsersByEvent` | Получить всех пользователей, зарегистрированных на событие | `GetAllUsersByEventRequest` | `GetAllUsersByEventResponse` |
+
 ---
 
 ## Шаги по запуску
@@ -68,11 +73,5 @@ go test -short ./... -v
 ```
 
 > Используется `testcontainers-go` для запуска БД в Docker
-
----
-
-## Валидация
-
-- Все поля в `CreateRequest` и `UpdateRequest` валидируются
 
 ---
