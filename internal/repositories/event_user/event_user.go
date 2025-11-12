@@ -66,7 +66,7 @@ func (r *EventUserRepository) GetAllByEvent(ctx context.Context, event_id int) (
 
 	for rows.Next() {
 		var id string
-		err := rows.Scan(id)
+		err := rows.Scan(&id)
 		if err != nil {
 			return nil, err
 		}
