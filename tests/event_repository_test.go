@@ -7,6 +7,7 @@ import (
 	"github.com/Estriper0/EventService/internal/models"
 	"github.com/Estriper0/EventService/internal/repositories"
 	"github.com/Estriper0/EventService/internal/repositories/event"
+	eventuser "github.com/Estriper0/EventService/internal/repositories/event_user"
 	"github.com/stretchr/testify/require"
 )
 
@@ -349,6 +350,184 @@ func (s *TestSuite) TestEventRepository_GetAllByStatus() {
 			for _, e := range events {
 				require.Equal(s.T(), tt.status, e.Status)
 			}
+		})
+	}
+}
+
+func (s *TestSuite) TestEventRepository_IncreaseCurrentAttedance() {
+	repo := event.New(s.db)
+
+	tests := []struct {
+		name    string
+		setup   func() int
+		eventID int
+		wantErr error
+	}{
+		{
+			name: "success - increase attendance",
+			setup: func() int {
+				id, err := repo.Create(s.ctx, &models.EventCreateRequest{
+					Title:        "Event to Attend",
+					MaxAttendees: 10,
+					Creator:      "ea27ecf4-02b1-453d-965d-408253a874b9",
+					Status:       models.StatusPublished,
+				})
+				require.NoError(s.T(), err)
+				return id
+			},
+			wantErr: nil,
+		},
+		{
+			name: "fail - max attendees reached",
+			setup: func() int {
+				id, err := repo.Create(s.ctx, &models.EventCreateRequest{
+					Title:        "Full Event",
+					MaxAttendees: 1,
+					Creator:      "ea27ecf4-02b1-453d-965d-408253a874b9",
+					Status:       models.StatusPublished,
+				})
+				require.NoError(s.T(), err)
+				err = repo.IncreaseCurrentAttedance(s.ctx, id)
+				require.NoError(s.T(), err)
+				return id
+			},
+			wantErr: repositories.ErrMaxRegistered,
+		},
+		{
+			name:    "fail - event not found",
+			eventID: 999,
+			wantErr: repositories.ErrRecordNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			if tt.setup != nil {
+				tt.eventID = tt.setup()
+			}
+
+			err := repo.IncreaseCurrentAttedance(s.ctx, tt.eventID)
+
+			if tt.wantErr != nil {
+				require.ErrorIs(s.T(), err, tt.wantErr)
+			} else {
+				require.NoError(s.T(), err)
+				got, getErr := repo.GetById(s.ctx, tt.eventID)
+				require.NoError(s.T(), getErr)
+				require.Equal(s.T(), 1, got.CurrentAttendance)
+			}
+		})
+	}
+}
+
+func (s *TestSuite) TestEventRepository_DecreaseCurrentAttedance() {
+	repo := event.New(s.db)
+
+	tests := []struct {
+		name    string
+		setup   func() int
+		eventID int
+		wantErr error
+	}{
+		{
+			name: "success - decrease attendance",
+			setup: func() int {
+				id, err := repo.Create(s.ctx, &models.EventCreateRequest{
+					Title:        "Event to Leave",
+					MaxAttendees: 10,
+					Creator:      "ea27ecf4-02b1-453d-965d-408253a874b9",
+					Status:       models.StatusPublished,
+				})
+				require.NoError(s.T(), err)
+				err = repo.IncreaseCurrentAttedance(s.ctx, id)
+				require.NoError(s.T(), err)
+				return id
+			},
+			wantErr: nil,
+		},
+		{
+			name:    "fail - event not found",
+			eventID: 999,
+			wantErr: repositories.ErrRecordNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			if tt.setup != nil {
+				tt.eventID = tt.setup()
+			}
+
+			err := repo.DecreaseCurrentAttedance(s.ctx, tt.eventID)
+
+			if tt.wantErr != nil {
+				require.ErrorIs(s.T(), err, tt.wantErr)
+			} else {
+				require.NoError(s.T(), err)
+				got, getErr := repo.GetById(s.ctx, tt.eventID)
+				require.NoError(s.T(), getErr)
+				require.Equal(s.T(), 0, got.CurrentAttendance)
+			}
+		})
+	}
+}
+
+func (s *TestSuite) TestEventRepository_GetAllByUser() {
+	repo := event.New(s.db)
+	userRepo := eventuser.New(s.db)
+
+	tests := []struct {
+		name    string
+		setup   func() string
+		userID  string
+		wantLen int
+		wantErr error
+	}{
+		{
+			name: "success - multiple events for user",
+			setup: func() string {
+				userID := "ea27ecf4-02b1-453d-965d-408253a874b9"
+				event1, err := repo.Create(s.ctx, &models.EventCreateRequest{
+					Title:   "Event 1",
+					Creator: userID,
+					Status:  models.StatusPublished,
+				})
+				require.NoError(s.T(), err)
+				event2, err := repo.Create(s.ctx, &models.EventCreateRequest{
+					Title:   "Event 2",
+					Creator: userID,
+					Status:  models.StatusPublished,
+				})
+				require.NoError(s.T(), err)
+
+				err = userRepo.Create(s.ctx, userID, event1)
+				require.NoError(s.T(), err)
+				err = userRepo.Create(s.ctx, userID, event2)
+				require.NoError(s.T(), err)
+
+				return userID
+			},
+			wantLen: 2,
+			wantErr: nil,
+		},
+		{
+			name:    "success - no events for user",
+			userID:  "ea30ecf4-02b1-453d-965d-408253a874b9",
+			wantLen: 0,
+			wantErr: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			if tt.setup != nil {
+				tt.userID = tt.setup()
+			}
+
+			events, err := repo.GetAllByUser(s.ctx, tt.userID)
+
+			require.ErrorIs(s.T(), err, tt.wantErr)
+			require.Len(s.T(), events, tt.wantLen)
 		})
 	}
 }
