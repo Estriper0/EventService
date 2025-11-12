@@ -4,10 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
-
-	pb "github.com/Estriper0/protobuf/gen/event"
-	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/Estriper0/EventService/internal/models"
 	"github.com/Estriper0/EventService/internal/repositories"
@@ -41,11 +37,10 @@ func (r *EventRepository) GetById(
 		&event.Creator,
 	)
 
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, repositories.ErrRecordNotFound
-	}
-
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, repositories.ErrRecordNotFound
+		}
 		return nil, err
 	}
 	return event, nil
@@ -266,7 +261,7 @@ func (r *EventRepository) DecreaseCurrentAttedance(ctx context.Context, event_id
 	return nil
 }
 
-func (r *EventRepository) GetAllByUser(ctx context.Context, user_id string) (*pb.GetAllByUserResponse, error) {
+func (r *EventRepository) GetAllByUser(ctx context.Context, user_id string) ([]*models.EventResponse, error) {
 	query := "SELECT events.* FROM events JOIN event_user ON events.id = event_user.event_id WHERE event_user.user_id = $1"
 	rows, err := r.db.QueryContext(ctx, query, user_id)
 	if err != nil {
@@ -274,16 +269,15 @@ func (r *EventRepository) GetAllByUser(ctx context.Context, user_id string) (*pb
 	}
 	defer rows.Close()
 
-	var events pb.GetAllByUserResponse
+	res := []*models.EventResponse{}
 
 	for rows.Next() {
-		event := &pb.EventElem{}
-		var time time.Time
+		event := &models.EventResponse{}
 		err := rows.Scan(
 			&event.Id,
 			&event.Title,
 			&event.About,
-			&time,
+			&event.StartDate,
 			&event.Location,
 			&event.Status,
 			&event.MaxAttendees,
@@ -293,8 +287,11 @@ func (r *EventRepository) GetAllByUser(ctx context.Context, user_id string) (*pb
 		if err != nil {
 			return nil, err
 		}
-		event.StartDate = timestamppb.New(time)
-		events.Events = append(events.Events, event)
+		res = append(res, event)
 	}
-	return &events, nil
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return res, nil
 }

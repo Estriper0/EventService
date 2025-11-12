@@ -479,3 +479,392 @@ func TestEventService_GetAllByStatus(t *testing.T) {
 		})
 	}
 }
+
+func TestEventService_Register(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocksRepo.NewMockIEventRepository(ctrl)
+	mockEURepo := mocksRepo.NewMockIEventUserRepository(ctrl)
+	mockCache := mocks.NewMockCache(ctrl)
+	logger := logger.GetLogger("test")
+	cfg := &config.Config{Redis: config.Redis{CacheTTL: time.Hour}}
+
+	eventService := New(mockRepo, mockEURepo, mockCache, logger, cfg)
+
+	ctx := context.Background()
+
+	tests := []struct {
+		name    string
+		userID  string
+		eventID int
+		setup   func()
+		wantErr error
+	}{
+		{
+			name:    "success",
+			userID:  "user1",
+			eventID: 1,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user1", 1).
+					Return(false, nil)
+				mockRepo.EXPECT().
+					IncreaseCurrentAttedance(ctx, 1).
+					Return(nil)
+				mockEURepo.EXPECT().
+					Create(ctx, "user1", 1).
+					Return(nil)
+			},
+			wantErr: nil,
+		},
+		{
+			name:    "already registered",
+			userID:  "user2",
+			eventID: 2,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user2", 2).
+					Return(true, nil)
+			},
+			wantErr: service.ErrRegistered,
+		},
+		{
+			name:    "max registered",
+			userID:  "user3",
+			eventID: 3,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user3", 3).
+					Return(false, nil)
+				mockRepo.EXPECT().
+					IncreaseCurrentAttedance(ctx, 3).
+					Return(repositories.ErrMaxRegistered)
+			},
+			wantErr: service.ErrMaxRegistered,
+		},
+		{
+			name:    "event not found on increase",
+			userID:  "user4",
+			eventID: 4,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user4", 4).
+					Return(false, nil)
+				mockRepo.EXPECT().
+					IncreaseCurrentAttedance(ctx, 4).
+					Return(repositories.ErrRecordNotFound)
+			},
+			wantErr: service.ErrRecordNotFound,
+		},
+		{
+			name:    "repository error on exists",
+			userID:  "user5",
+			eventID: 5,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user5", 5).
+					Return(false, assert.AnError)
+			},
+			wantErr: service.ErrRepositoryError,
+		},
+		{
+			name:    "repository error on increase",
+			userID:  "user6",
+			eventID: 6,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user6", 6).
+					Return(false, nil)
+				mockRepo.EXPECT().
+					IncreaseCurrentAttedance(ctx, 6).
+					Return(assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name:    "repository error on create",
+			userID:  "user7",
+			eventID: 7,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user7", 7).
+					Return(false, nil)
+				mockRepo.EXPECT().
+					IncreaseCurrentAttedance(ctx, 7).
+					Return(nil)
+				mockEURepo.EXPECT().
+					Create(ctx, "user7", 7).
+					Return(assert.AnError)
+			},
+			wantErr: service.ErrRepositoryError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.setup != nil {
+				tt.setup()
+			}
+
+			err := eventService.Register(ctx, tt.userID, tt.eventID)
+
+			assert.ErrorIs(t, err, tt.wantErr)
+		})
+	}
+}
+
+func TestEventService_CancellRegister(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocksRepo.NewMockIEventRepository(ctrl)
+	mockEURepo := mocksRepo.NewMockIEventUserRepository(ctrl)
+	mockCache := mocks.NewMockCache(ctrl)
+	logger := logger.GetLogger("test")
+	cfg := &config.Config{Redis: config.Redis{CacheTTL: time.Hour}}
+
+	eventService := New(mockRepo, mockEURepo, mockCache, logger, cfg)
+
+	ctx := context.Background()
+
+	tests := []struct {
+		name    string
+		userID  string
+		eventID int
+		setup   func()
+		wantErr error
+	}{
+		{
+			name:    "success",
+			userID:  "user1",
+			eventID: 1,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user1", 1).
+					Return(true, nil)
+				mockRepo.EXPECT().
+					DecreaseCurrentAttedance(ctx, 1).
+					Return(nil)
+				mockEURepo.EXPECT().
+					Delete(ctx, "user1", 1).
+					Return(nil)
+			},
+			wantErr: nil,
+		},
+		{
+			name:    "not registered",
+			userID:  "user2",
+			eventID: 2,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user2", 2).
+					Return(false, nil)
+			},
+			wantErr: service.ErrNotRegistered,
+		},
+		{
+			name:    "event not found on decrease",
+			userID:  "user3",
+			eventID: 3,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user3", 3).
+					Return(true, nil)
+				mockRepo.EXPECT().
+					DecreaseCurrentAttedance(ctx, 3).
+					Return(repositories.ErrRecordNotFound)
+			},
+			wantErr: service.ErrRecordNotFound,
+		},
+		{
+			name:    "repository error on exists",
+			userID:  "user4",
+			eventID: 4,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user4", 4).
+					Return(false, assert.AnError)
+			},
+			wantErr: service.ErrRepositoryError,
+		},
+		{
+			name:    "repository error on decrease",
+			userID:  "user5",
+			eventID: 5,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user5", 5).
+					Return(true, nil)
+				mockRepo.EXPECT().
+					DecreaseCurrentAttedance(ctx, 5).
+					Return(assert.AnError)
+			},
+			wantErr: service.ErrRepositoryError,
+		},
+		{
+			name:    "event not found on delete",
+			userID:  "user6",
+			eventID: 6,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user6", 6).
+					Return(true, nil)
+				mockRepo.EXPECT().
+					DecreaseCurrentAttedance(ctx, 6).
+					Return(nil)
+				mockEURepo.EXPECT().
+					Delete(ctx, "user6", 6).
+					Return(repositories.ErrRecordNotFound)
+			},
+			wantErr: service.ErrRecordNotFound,
+		},
+		{
+			name:    "repository error on delete",
+			userID:  "user7",
+			eventID: 7,
+			setup: func() {
+				mockEURepo.EXPECT().
+					Exists(ctx, "user7", 7).
+					Return(true, nil)
+				mockRepo.EXPECT().
+					DecreaseCurrentAttedance(ctx, 7).
+					Return(nil)
+				mockEURepo.EXPECT().
+					Delete(ctx, "user7", 7).
+					Return(assert.AnError)
+			},
+			wantErr: service.ErrRepositoryError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.setup != nil {
+				tt.setup()
+			}
+
+			err := eventService.CancellRegister(ctx, tt.userID, tt.eventID)
+
+			assert.ErrorIs(t, err, tt.wantErr)
+		})
+	}
+}
+
+func TestEventService_GetAllByUser(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocksRepo.NewMockIEventRepository(ctrl)
+	mockEURepo := mocksRepo.NewMockIEventUserRepository(ctrl)
+	mockCache := mocks.NewMockCache(ctrl)
+	logger := logger.GetLogger("test")
+	cfg := &config.Config{Redis: config.Redis{CacheTTL: time.Hour}}
+
+	eventService := New(mockRepo, mockEURepo, mockCache, logger, cfg)
+
+	ctx := context.Background()
+
+	tests := []struct {
+		name    string
+		userID  string
+		setup   func()
+		want    []*models.EventResponse
+		wantErr error
+	}{
+		{
+			name:   "success",
+			userID: "user1",
+			setup: func() {
+				mockRepo.EXPECT().
+					GetAllByUser(ctx, "user1").
+					Return([]*models.EventResponse{{Id: 1, Title: "Event"}}, nil)
+			},
+			want:    []*models.EventResponse{{Id: 1, Title: "Event"}},
+			wantErr: nil,
+		},
+		{
+			name:   "repository error",
+			userID: "user2",
+			setup: func() {
+				mockRepo.EXPECT().
+					GetAllByUser(ctx, "user2").
+					Return(nil, assert.AnError)
+			},
+			want:    nil,
+			wantErr: service.ErrRepositoryError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.setup != nil {
+				tt.setup()
+			}
+
+			got, err := eventService.GetAllByUser(ctx, tt.userID)
+
+			assert.ErrorIs(t, err, tt.wantErr)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestEventService_GetAllUsersByEvent(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocksRepo.NewMockIEventRepository(ctrl)
+	mockEURepo := mocksRepo.NewMockIEventUserRepository(ctrl)
+	mockCache := mocks.NewMockCache(ctrl)
+	logger := logger.GetLogger("test")
+	cfg := &config.Config{Redis: config.Redis{CacheTTL: time.Hour}}
+
+	eventService := New(mockRepo, mockEURepo, mockCache, logger, cfg)
+
+	ctx := context.Background()
+
+	tests := []struct {
+		name    string
+		eventID int
+		setup   func()
+		want    *[]string
+		wantErr error
+	}{
+		{
+			name:    "success",
+			eventID: 1,
+			setup: func() {
+				mockEURepo.EXPECT().
+					GetAllByEvent(ctx, 1).
+					Return(&[]string{"id_1", "id_2"}, nil)
+			},
+			want: &[]string{"id_1", "id_2"},
+			wantErr: nil,
+		},
+		{
+			name:    "repository error",
+			eventID: 2,
+			setup: func() {
+				mockEURepo.EXPECT().
+					GetAllByEvent(ctx, 2).
+					Return(nil, assert.AnError)
+			},
+			want:    nil,
+			wantErr: service.ErrRepositoryError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.setup != nil {
+				tt.setup()
+			}
+
+			got, err := eventService.GetAllUsersByEvent(ctx, tt.eventID)
+
+			assert.ErrorIs(t, err, tt.wantErr)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}

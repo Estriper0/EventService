@@ -6,8 +6,8 @@ import (
 
 	rd "github.com/Estriper0/EventService/internal/cache/redis"
 	"github.com/Estriper0/EventService/internal/config"
-	event_repo "github.com/Estriper0/EventService/internal/repositories/database/event"
-	eventuser "github.com/Estriper0/EventService/internal/repositories/database/event_user"
+	event_repo "github.com/Estriper0/EventService/internal/repositories/event"
+	eventuser "github.com/Estriper0/EventService/internal/repositories/event_user"
 	"github.com/Estriper0/EventService/internal/server"
 	event_service "github.com/Estriper0/EventService/internal/service/event"
 	db "github.com/Estriper0/EventService/pkg/database"

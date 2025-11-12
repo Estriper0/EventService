@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/Estriper0/EventService/internal/models"
-	pb "github.com/Estriper0/protobuf/gen/event"
 )
 
 type IEventService interface {
@@ -48,9 +47,9 @@ type IEventService interface {
 	GetAllByUser(
 		ctx context.Context,
 		user_id string,
-	) (*pb.GetAllByUserResponse, error)
+	) ([]*models.EventResponse, error)
 	GetAllUsersByEvent(
 		ctx context.Context,
 		event_id int,
-	) (*pb.GetAllUsersByEventResponse, error)
+	) (*[]string, error)
 }

@@ -262,20 +262,41 @@ func (s *EventGRPCService) GetAllByUser(
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	resp, err := s.eventService.GetAllByUser(ctx, req.UserId)
+	events, err := s.eventService.GetAllByUser(ctx, req.UserId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "internal error")
 	}
-	return resp, nil
+	response := &pb.GetAllByUserResponse{
+		Events: []*pb.EventElem{},
+	}
+	for _, event := range events {
+		pb_event := &pb.EventElem{
+			Id:                int64(event.Id),
+			Title:             event.Title,
+			About:             event.About,
+			StartDate:         timestamppb.New(event.StartDate),
+			Location:          event.Location,
+			Status:            string(event.Status),
+			MaxAttendees:      int32(event.MaxAttendees),
+			CurrentAttendance: int32(event.CurrentAttendance),
+			Creator:           event.Creator,
+		}
+		response.Events = append(response.Events, pb_event)
+	}
+	return response, nil
 }
 
 func (s *EventGRPCService) GetAllUsersByEvent(
 	ctx context.Context,
 	req *pb.GetAllUsersByEventRequest,
 ) (*pb.GetAllUsersByEventResponse, error) {
-	resp, err := s.eventService.GetAllUsersByEvent(ctx, int(req.EventId))
+	users_id, err := s.eventService.GetAllUsersByEvent(ctx, int(req.EventId))
 	if err != nil {
 		return nil, status.Error(codes.Internal, "internal error")
 	}
-	return resp, nil
+	response := &pb.GetAllUsersByEventResponse{}
+	for _, id := range *users_id {
+		response.UsersId = append(response.UsersId, id)
+	}
+	return response, nil
 }

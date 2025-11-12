@@ -6,7 +6,7 @@ import (
 
 	"github.com/Estriper0/EventService/internal/models"
 	"github.com/Estriper0/EventService/internal/repositories"
-	"github.com/Estriper0/EventService/internal/repositories/database/event"
+	"github.com/Estriper0/EventService/internal/repositories/event"
 	"github.com/stretchr/testify/require"
 )
 

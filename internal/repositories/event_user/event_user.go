@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	pb "github.com/Estriper0/protobuf/gen/event"
-
 	"github.com/Estriper0/EventService/internal/repositories"
 )
 
@@ -56,7 +54,7 @@ func (r *EventUserRepository) Delete(ctx context.Context, user_id string, event_
 	return nil
 }
 
-func (r *EventUserRepository) GetAllByEvent(ctx context.Context, event_id int) (*pb.GetAllUsersByEventResponse, error) {
+func (r *EventUserRepository) GetAllByEvent(ctx context.Context, event_id int) (*[]string, error) {
 	query := "SELECT user_id FROM event_user WHERE event_id = $1"
 	rows, err := r.db.QueryContext(ctx, query, event_id)
 	if err != nil {
@@ -64,15 +62,15 @@ func (r *EventUserRepository) GetAllByEvent(ctx context.Context, event_id int) (
 	}
 	defer rows.Close()
 
-	var users pb.GetAllUsersByEventResponse
+	var users []string
 
 	for rows.Next() {
 		var id string
-		err := rows.Scan(&id)
+		err := rows.Scan(id)
 		if err != nil {
 			return nil, err
 		}
-		users.UsersId = append(users.UsersId, id)
+		users = append(users, id)
 	}
 	return &users, nil
 }

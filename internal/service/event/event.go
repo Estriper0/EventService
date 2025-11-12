@@ -6,8 +6,6 @@ import (
 	"log/slog"
 	"strconv"
 
-	pb "github.com/Estriper0/protobuf/gen/event"
-
 	"github.com/Estriper0/EventService/internal/cache"
 	"github.com/Estriper0/EventService/internal/config"
 	"github.com/Estriper0/EventService/internal/models"
@@ -312,7 +310,7 @@ func (s *EventService) CancellRegister(ctx context.Context, user_id string, even
 	return nil
 }
 
-func (s *EventService) GetAllByUser(ctx context.Context, user_id string) (*pb.GetAllByUserResponse, error) {
+func (s *EventService) GetAllByUser(ctx context.Context, user_id string) ([]*models.EventResponse, error) {
 	events, err := s.eventRepo.GetAllByUser(ctx, user_id)
 	if err != nil {
 		s.logger.Error(
@@ -329,7 +327,7 @@ func (s *EventService) GetAllByUser(ctx context.Context, user_id string) (*pb.Ge
 	return events, nil
 }
 
-func (s *EventService) GetAllUsersByEvent(ctx context.Context, event_id int) (*pb.GetAllUsersByEventResponse, error) {
+func (s *EventService) GetAllUsersByEvent(ctx context.Context, event_id int) (*[]string, error) {
 	users_id, err := s.eventUserRepo.GetAllByEvent(ctx, event_id)
 	if err != nil {
 		s.logger.Error(
