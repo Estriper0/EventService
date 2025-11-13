@@ -103,7 +103,7 @@ func (s *TestSuite) TestEventRepository_GetAll() {
 		{
 			name: "empty table",
 			setup: func() {
-				_, err := s.db.ExecContext(s.ctx, "TRUNCATE TABLE events CASCADE;")
+				_, err := s.db.ExecContext(s.ctx, "TRUNCATE TABLE event.events CASCADE;")
 				require.NoError(s.T(), err)
 			},
 			want: 0,

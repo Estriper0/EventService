@@ -23,7 +23,7 @@ func (r *EventRepository) GetById(
 	ctx context.Context,
 	id int,
 ) (*models.EventResponse, error) {
-	query := "SELECT * FROM events WHERE id = $1"
+	query := "SELECT * FROM event.events WHERE id = $1"
 	event := &models.EventResponse{}
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&event.Id,
@@ -49,7 +49,7 @@ func (r *EventRepository) GetById(
 func (r *EventRepository) GetAll(
 	ctx context.Context,
 ) ([]*models.EventResponse, error) {
-	query := "SELECT * FROM events ORDER BY title"
+	query := "SELECT * FROM event.events ORDER BY title"
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (r *EventRepository) Create(
 	event *models.EventCreateRequest,
 ) (int, error) {
 	var id int
-	query := "INSERT INTO events (title, about, start_date, location, status, max_attendees, creator) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
+	query := "INSERT INTO event.events (title, about, start_date, location, status, max_attendees, creator) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
 	err := r.db.QueryRowContext(
 		ctx,
 		query,
@@ -111,7 +111,7 @@ func (r *EventRepository) DeleteById(
 	ctx context.Context,
 	id int,
 ) error {
-	query := "DELETE FROM events WHERE id = $1"
+	query := "DELETE FROM event.events WHERE id = $1"
 	res, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
@@ -128,7 +128,7 @@ func (r *EventRepository) Update(
 	ctx context.Context,
 	event *models.EventUpdateRequest,
 ) error {
-	query := "UPDATE events SET title = $1, about = $2, start_date = $3, location = $4, status = $5, max_attendees = $6 WHERE id = $7"
+	query := "UPDATE event.events SET title = $1, about = $2, start_date = $3, location = $4, status = $5, max_attendees = $6 WHERE id = $7"
 	res, err := r.db.ExecContext(
 		ctx,
 		query,
@@ -157,7 +157,7 @@ func (r *EventRepository) GetAllByCreator(
 	ctx context.Context,
 	creator string,
 ) ([]*models.EventResponse, error) {
-	query := "SELECT * FROM events WHERE creator = $1 ORDER BY title"
+	query := "SELECT * FROM event.events WHERE creator = $1 ORDER BY title"
 	rows, err := r.db.QueryContext(ctx, query, creator)
 	if err != nil {
 		return nil, err
@@ -195,7 +195,7 @@ func (r *EventRepository) GetAllByStatus(
 	ctx context.Context,
 	status string,
 ) ([]*models.EventResponse, error) {
-	query := "SELECT * FROM events WHERE status = $1 ORDER BY title"
+	query := "SELECT * FROM event.events WHERE status = $1 ORDER BY title"
 	rows, err := r.db.QueryContext(ctx, query, status)
 	if err != nil {
 		return nil, err
@@ -230,7 +230,7 @@ func (r *EventRepository) GetAllByStatus(
 }
 
 func (r *EventRepository) IncreaseCurrentAttedance(ctx context.Context, event_id int) error {
-	query := "UPDATE events SET current_attendance = current_attendance + 1 WHERE id = $1"
+	query := "UPDATE event.events SET current_attendance = current_attendance + 1 WHERE id = $1"
 	res, err := r.db.ExecContext(ctx, query, event_id)
 
 	if err != nil {
@@ -246,7 +246,7 @@ func (r *EventRepository) IncreaseCurrentAttedance(ctx context.Context, event_id
 }
 
 func (r *EventRepository) DecreaseCurrentAttedance(ctx context.Context, event_id int) error {
-	query := "UPDATE events SET current_attendance = current_attendance - 1 WHERE id = $1"
+	query := "UPDATE event.events SET current_attendance = current_attendance - 1 WHERE id = $1"
 	res, err := r.db.ExecContext(ctx, query, event_id)
 
 	if err != nil {
@@ -262,7 +262,7 @@ func (r *EventRepository) DecreaseCurrentAttedance(ctx context.Context, event_id
 }
 
 func (r *EventRepository) GetAllByUser(ctx context.Context, user_id string) ([]*models.EventResponse, error) {
-	query := "SELECT events.* FROM events JOIN event_user ON events.id = event_user.event_id WHERE event_user.user_id = $1"
+	query := "SELECT event.events.* FROM event.events JOIN event.event_user ON events.id = event_user.event_id WHERE event_user.user_id = $1"
 	rows, err := r.db.QueryContext(ctx, query, user_id)
 	if err != nil {
 		return nil, err

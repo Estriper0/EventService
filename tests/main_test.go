@@ -67,7 +67,13 @@ func (s *TestSuite) SetupSuite() {
 	db, err := sql.Open("postgres", connStr)
 	s.Require().NoError(err)
 
-	driver, err := migrate_pg.WithInstance(db, &migrate_pg.Config{})
+	_, err = db.Exec("CREATE SCHEMA IF NOT EXISTS event")
+	s.Require().NoError(err)
+
+	driver, err := migrate_pg.WithInstance(db, &migrate_pg.Config{
+		MigrationsTable: "event.migrations",
+		SchemaName:      "event",
+	})
 	s.Require().NoError(err)
 
 	m, err := migrate.NewWithDatabaseInstance(
@@ -75,7 +81,10 @@ func (s *TestSuite) SetupSuite() {
 		"postgres", driver)
 	s.Require().NoError(err)
 
-	m.Up()
+	err = m.Up()
+	if err != nil {
+		panic(err)
+	}
 
 	s.ctx = ctx
 	s.db = db
@@ -88,6 +97,6 @@ func (s *TestSuite) TearDownSuite() {
 }
 
 func (s *TestSuite) SetupTest() {
-	_, err := s.db.ExecContext(s.ctx, "TRUNCATE TABLE events CASCADE;")
+	_, err := s.db.ExecContext(s.ctx, "TRUNCATE TABLE event.events, event.event_user CASCADE;")
 	s.Require().NoError(err)
 }

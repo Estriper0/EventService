@@ -1,2 +1,3 @@
-DROP TABLE event;
-DROP TYPE event_status;
+DROP TABLE IF EXISTS event.events;
+DROP TYPE IF EXISTS event_status;
+DROP SCHEMA IF EXISTS event;

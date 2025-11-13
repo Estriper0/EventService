@@ -1,3 +1,5 @@
+CREATE SCHEMA IF NOT EXISTS event;
+
 CREATE TYPE event_status AS ENUM (
     'draft',
     'published',
@@ -7,7 +9,7 @@ CREATE TYPE event_status AS ENUM (
     'postponed'
 );
 
-CREATE TABLE events (
+CREATE TABLE IF NOT EXISTS event.events (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     about TEXT,

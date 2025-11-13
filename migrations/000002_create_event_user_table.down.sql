@@ -1,1 +1,1 @@
-DROP TABLE event_user;
+DROP TABLE IF EXISTS event.event_user;
